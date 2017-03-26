@@ -21,6 +21,14 @@ Following steps are performed for feature extractions
 #### Preprocessing
 Images are read from the source files and visualized. One important thing to noticed here is that - most images belong to rear view of the car (_this is has some effect on detection, as discussed in last section_) Once images are read, I tried changing colorspaces and plot the histogram of colors to see how vehicle and non-vehicle classes deferred. I tried RGB, YCrCb, HSV and HSL colorspaces with 16, 32 and 64 bin sizes. HSV and HLS colorspaces with 32 bins were choosen as they looked promising.
 
+Below is the sample image showing vehicle and non-vehicle data:
+
+![data](../output_images/data_display.png)
+
+Example of HSV histogram for vehicle and non-vehicle data:
+
+![hsv-hist](../output_images/hsv_histogram.png)
+
 #### Histogram of Oriented Gradients (HOG)
 This was done as a part of [preprocessing][ppr] and [feature selection](fsel1) steps. I tried following options:
 - pix_per_cell: [4,8]
@@ -34,6 +42,10 @@ Based on different tests, I could make following observations:
 - 9 orientations gave better results than 7 or 8 orientations
 - cell_per_block=2,pix_per_cell=4,orient=8, img_resize=(32,32) for HOG feature on grayscale images with 16 bin histogram of RGB channels gave a 99.07%/98.98% train/test accuracy. But was very poor on actual road images. This was a clear call to use different feature vectors
 - cell_per_block=2,pix_per_cell=8,orient=9, img_resize=(64,64) for HOG features and 32 bin histogram for HSV colorspaces gave a fair performance of 98.93% accuracy on test set, but could detect cars on actual road images fairly well.
+
+Below image shows the HOG image for vehicle data for R, G, B channels and Gray image
+
+![rgb-hog](../output_images/HOG_RGB.png)
 
 #### Machine Learning Models
 This process is done togather with previous step. I tried Random Forests (RF) and Support Vector Machines (SVM) on the HOG+Color features and conducted a grid search to evaluate their performance.
@@ -69,40 +81,63 @@ Best performing RF classifiers gave a good accuracy of ~99% on validation set, b
 
 ### Sliding Window Search
 
-#### 1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
+Sliding window technique is used to detect the cars in the video frame. Each video frame is divided into number of windows and these windows are used to test using the trained machine learning model. We can use multiple size window to detect the cars which appear to be of different size depending on their position in the image.
 
-I decided to search random window positions at random scales all over the image and came up with this (ok just kidding I didn't actually ;):
+Instead of using whole of image, we can define the region of interest, where we generally see the cars. This is done by trial and error on the given dataset. One such attempt is depicted below:
 
-![alt text][image3]
+![roi](../output_images/roi.png)
 
-####2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
+The red border shows the area used for sliding window. Image below shows how we can fit a sliding window in region of interest:
 
-Ultimately I searched on two scales using YCrCb 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result.  Here are some example images:
+![swin](../output_images/swin.png)
 
-![alt text][image4]
----
+When deciding on multiple scales for window size, we can use some clever techniques of adjusting the position of the window sizes. Use larger window sizes in whole ROI and smaller window sizes near the horizon lines. Below images shows such arrangement for just two window sizes:
+
+![multi](../output_images/multi.png)
+
+I used a 50% overlap of windows to achieve a good result. Increasing the overlap resulted in multiple detections and did not improve the overall performance.
+
+__Multiple Detections__
+
+Using multiple window sizes might result in multiple detection of same car. Since we have a 50% overlap, it's possible that the algorithm detects in multiple scales as well as multiple window positions. Below shows one such example:
+
+![multi_det](multi_det.png)
+
+I used the technique mentioned in the lecture to handle this case. Using heat map based threshold to detect the center of the car and draw a boundary around it. This performed well and below pic represents one result:
+
+![heat](heat.png)
+
+
 
 ### Video Implementation
 
-####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (somewhat wobbly or unstable bounding boxes are ok as long as you are identifying the vehicles most of the time with minimal false positives.)
-Here's a [link to my video result](./project_video.mp4)
+Video implementation was just similar to all the steps mentioned above, but with a few differences. Video makes it easier to handle false positives and track based on previous frame information.
 
+__False Positives__
 
-####2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
+Our classifier sometime misclassifies the non-vehicle window portions as the vehicle images. This results in a false positives. These can be handled if we know the previous frame information. I fixed this issue using a very simple technique shown below:
 
-I recorded the positions of positive detections in each frame of the video.  From the positive detections I created a heatmap and then thresholded that map to identify vehicle positions.  I then used `scipy.ndimage.measurements.label()` to identify individual blobs in the heatmap.  I then assumed each blob corresponded to a vehicle.  I constructed bounding boxes to cover the area of each blob detected.  
+```python
+from collections import deque
+from functools import reduce
+# have a dqueue of last 5 frames
+heatmaps=deque(maxlen=5)
 
-Here's an example result showing the heatmap from a series of frames of video, the result of `scipy.ndimage.measurements.label()` and the bounding boxes then overlaid on the last frame of video:
+def process_video(frame):
+    bbox_list=get_bboxlist(frame)
+    heatmaps.append(add_heat(np.zeros_like(frame[:,:,0]).astype(np.float),bbox_list))
+    # detect as a car only if it appears in 2 or more frames
+    heatmap = apply_threshold(reduce(lambda x,y: x + y, heatmaps), 2)
+    labels = label(heatmap)
+    plt.imshow(labels[0], cmap='gray')
+    return draw_labeled_bboxes(frame, labels)
+```
 
-### Here are six frames and their corresponding heatmaps:
+I create a fixed length queue using `dqueue` and apply a threashold of 2. This makes sure that only when 2 or more consecutive frames detect a car, that window is classified as car.
 
-![alt text][image5]
+Here is the [YouTube link](https://www.youtube.com/watch?v=Z32THrnDAdY) for video demo:
 
-### Here is the output of `scipy.ndimage.measurements.label()` on the integrated heatmap from all six frames:
-![alt text][image6]
-
-### Here the resulting bounding boxes are drawn onto the last frame in the series:
-![alt text][image7]
+[![video](http://img.youtube.com/vi/Z32THrnDAdY/0.jpg)](https://www.youtube.com/watch?v=Z32THrnDAdY)
 
 
 
@@ -110,9 +145,18 @@ Here's an example result showing the heatmap from a series of frames of video, t
 
 ### Discussion
 
-####1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
-#### <a name="back_view"></a> Back view problem
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+#### 1. Feature Vectors
+
+I need to spend some more time on deciding on the right feature vectors. When the size of features is more than 1000, it takes too long to train and test and hance can not be real time.
+
+#### <a name="back_view"></a> 2. Back view problem
+
+As alluded before, most of the images in the dataset contain the backside view of the car. We do see left and right portions of the car in our camera frames. If we can train the machine learning model with side view of the cars, I hope we can get much better results.
+
+#### CNN based features
+
+Use convolution neural networks to get the features. Datasets like CIFAR-10 have car categories and can be used to get better features.
+
 
 [//]: # (References)
 [fsel1]: ./Feature_Selection.html
