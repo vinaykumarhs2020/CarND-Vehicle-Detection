@@ -10,45 +10,66 @@ __Key lessons learnt__:
 
 
 __Files in the submission__:
-- Preprocessing.ipynb/html - All the preprocessing steps for images
-- Feature_Extraction(*)ipynb/html - Attempts at extracting features 
-- Sliding window - Trying different things with sliding window size adjustments
-- Submission_notebook.ipynb/html - Final ipython notebook
+- Preprocessing.html - All the preprocessing steps for images
+- Feature_Extraction(*)./html - Attempts at extracting features 
+- Sliding_window.html - Trying different things with sliding window size adjustments
+- Submission_notebook.html - Final ipython notebook
 
 
-### Feature Extraction
+### Feature Extraction and Machine Learning Models
 Following steps are performed for feature extractions
 #### Preprocessing
 Images are read from the source files and visualized. One important thing to noticed here is that - most images belong to rear view of the car (_this is has some effect on detection, as discussed in last section_) Once images are read, I tried changing colorspaces and plot the histogram of colors to see how vehicle and non-vehicle classes deferred. I tried RGB, YCrCb, HSV and HSL colorspaces with 16, 32 and 64 bin sizes. HSV and HLS colorspaces with 32 bins were choosen as they looked promising.
 
 #### Histogram of Oriented Gradients (HOG)
-This was done as a part of preprocessing and feature selection step. 
-####1. Explain how (and identify where in your code) you extracted HOG features from the training images.
+This was done as a part of [preprocessing][ppr] and [feature selection](fsel1) steps. I tried following options:
+- pix_per_cell: [4,8]
+- cell_per_block: [2,4]
+- orient: [7,8,9]
+- Image size: (32x32), (64x64)
+- Color spaces: Gray, RGB (individual channels), HSV (individual channels)
 
-The code for this step is contained in the first code cell of the IPython notebook (or in lines # through # of the file called `some_file.py`).  
+Based on different tests, I could make following observations:
+- Using (32x32) image size helped reduce the feature vector size. Using (64x64) images gave better accuracy.
+- 9 orientations gave better results than 7 or 8 orientations
+- cell_per_block=2,pix_per_cell=4,orient=8, img_resize=(32,32) for HOG feature on grayscale images with 16 bin histogram of RGB channels gave a 99.07%/98.98% train/test accuracy. But was very poor on actual road images. This was a clear call to use different feature vectors
+- cell_per_block=2,pix_per_cell=8,orient=9, img_resize=(64,64) for HOG features and 32 bin histogram for HSV colorspaces gave a fair performance of 98.93% accuracy on test set, but could detect cars on actual road images fairly well.
 
-I started by reading in all the `vehicle` and `non-vehicle` images.  Here is an example of one of each of the `vehicle` and `non-vehicle` classes:
-
-![alt text][image1]
-
-I then explored different color spaces and different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`).  I grabbed random images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` output looks like.
-
-Here is an example using the `YCrCb` color space and HOG parameters of `orientations=8`, `pixels_per_cell=(8, 8)` and `cells_per_block=(2, 2)`:
+#### Machine Learning Models
+This process is done togather with previous step. I tried Random Forests (RF) and Support Vector Machines (SVM) on the HOG+Color features and conducted a grid search to evaluate their performance.
 
 
-![alt text][image2]
+__SVM Classifier__
+I tried following parameters for SVM clasifier:
+- kernel: 'linear', 'rbf'
+- C: [1, 10, 100, 1000]
+- gamma: [0.1, 0.001,0.0001]
 
-####2. Explain how you settled on your final choice of HOG parameters.
+Top performing results:
 
-I tried various combinations of parameters and...
+| Rank | kernel | gamma | C | Validation Accuracy | 
+| --- | --- | --- | --- | --- |
+| 1 | rbf | 0.001 | 10 | 0.993 |
+| 2 | rbf | 0.001 | 100 | 0.993 |
+| 3 | rbf | 0.001 | 1000 | 0.993 |
 
-####3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
+Clearly 'rbf' kernel with 0.001 gamma performs well. I double checked the accuracy numbers to be sliglty different in 4th or 5ht precision nummbers. 
 
-I trained a linear SVM using...
+__Random Forest Classifier__
+I tried RF classifier cross validation with following parameters:
+- max_depth": [3, None]
+- max_features: [1, 3, 10]
+- min_samples_split: [1, 3, 10]
+- min_samples_leaf: [1, 3, 10]
+- bootstrap: [True, False]
+- criterion": ["gini", "entropy"]
 
-###Sliding Window Search
+Best performing RF classifiers gave a good accuracy of ~99% on validation set, but were not effective on real road images sliding window search. 
 
-####1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
+
+### Sliding Window Search
+
+#### 1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
 
 I decided to search random window positions at random scales all over the image and came up with this (ok just kidding I didn't actually ;):
 
@@ -93,12 +114,10 @@ Here's an example result showing the heatmap from a series of frames of video, t
 #### <a name="back_view"></a> Back view problem
 Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
 
-[//]: # (Image References)
-[image1]: ./examples/car_not_car.png
-[image2]: ./examples/HOG_example.jpg
-[image3]: ./examples/sliding_windows.jpg
-[image4]: ./examples/sliding_window.jpg
-[image5]: ./examples/bboxes_and_heat.png
-[image6]: ./examples/labels_map.png
-[image7]: ./examples/output_bboxes.png
-[video1]: ./project_video.mp4
+[//]: # (References)
+[fsel1]: ./Feature_Selection.html
+[fsel2]: ./Feature_Selection_trial2.html
+[fsel3]: ./Feature_Selection_trial3.html
+[ppr]: ./Preproceessing.html
+[swin]: ./Sliding_Window.html
+[subm]: ./Submission_Notebook.html
