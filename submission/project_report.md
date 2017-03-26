@@ -153,7 +153,7 @@ I need to spend some more time on deciding on the right feature vectors. When th
 
 As alluded before, most of the images in the dataset contain the backside view of the car. We do see left and right portions of the car in our camera frames. If we can train the machine learning model with side view of the cars, I hope we can get much better results.
 
-#### CNN based features
+#### 3. CNN based features
 
 Use convolution neural networks to get the features. Datasets like CIFAR-10 have car categories and can be used to get better features.
 
