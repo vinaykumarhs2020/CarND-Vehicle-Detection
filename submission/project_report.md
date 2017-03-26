@@ -83,7 +83,7 @@ Best performing RF classifiers gave a good accuracy of ~99% on validation set, b
 
 Sliding window technique is used to detect the cars in the video frame. Each video frame is divided into number of windows and these windows are used to test using the trained machine learning model. We can use multiple size window to detect the cars which appear to be of different size depending on their position in the image.
 
-Instead of using whole of image, we can define the region of interest, where we generally see the cars. This is done by trial and error on the given dataset. One such attempt is depicted below:
+Instead of using whole of image, we can define the region of interest, where we generally see the cars. We can also try to reduce the size of imagea and try to use sliding windows. This is done by trial and error on the given dataset. One such attempt is depicted below:
 
 ![roi](../output_images/roi.png)
 
@@ -101,11 +101,11 @@ __Multiple Detections__
 
 Using multiple window sizes might result in multiple detection of same car. Since we have a 50% overlap, it's possible that the algorithm detects in multiple scales as well as multiple window positions. Below shows one such example:
 
-![multi_det](multi_det.png)
+![multi_det](../output_images/multi_det.png)
 
 I used the technique mentioned in the lecture to handle this case. Using heat map based threshold to detect the center of the car and draw a boundary around it. This performed well and below pic represents one result:
 
-![heat](heat.png)
+![heat](../output_images/heat.png)
 
 
 
