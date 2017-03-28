@@ -47,6 +47,9 @@ Below image shows the HOG image for vehicle data for R, G, B channels and Gray i
 
 ![rgb-hog](../output_images/HOG_RGB.png)
 
+Following the some hints from the reviewers suggestions, I tried using Linear Kernel to improve the speed of detection.
+
+
 #### Machine Learning Models
 This process is done togather with previous step. I tried Random Forests (RF) and Support Vector Machines (SVM) on the HOG+Color features and conducted a grid search to evaluate their performance.
 
@@ -135,7 +138,8 @@ def process_video(frame):
 
 I create a fixed length queue using `dqueue` and apply a threashold of 2. This makes sure that only when 2 or more consecutive frames detect a car, that window is classified as car.
 
-Here is the [YouTube link](https://www.youtube.com/watch?v=Z32THrnDAdY) for video demo:
+Here is the [Old video link](https://www.youtube.com/watch?v=Z32THrnDAdY)
+New Video link:
 
 [![video](http://img.youtube.com/vi/Z32THrnDAdY/0.jpg)](https://www.youtube.com/watch?v=Z32THrnDAdY)
 
