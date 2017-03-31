@@ -141,8 +141,7 @@ I create a fixed length queue using `dqueue` and apply a threashold of 2. This m
 Here is the [Old video link](https://www.youtube.com/watch?v=Z32THrnDAdY)
 New Video link:
 
-[![video](http://img.youtube.com/vi/Z32THrnDAdY/0.jpg)](https://www.youtube.com/watch?v=Z32THrnDAdY)
-
+[![video](http://img.youtube.com/vi/vTiS-q294PY/0.jpg)](https://www.youtube.com/watch?v=vTiS-q294PY)
 
 
 ---
