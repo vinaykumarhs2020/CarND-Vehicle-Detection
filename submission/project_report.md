@@ -30,7 +30,7 @@ Example of HSV histogram for vehicle and non-vehicle data:
 ![hsv-hist](../output_images/hsv_histogram.png)
 
 #### Histogram of Oriented Gradients (HOG)
-This was done as a part of [preprocessing][ppr] and [feature selection](fsel1) steps. I tried following options:
+This was done as a part of [preprocessing][ppr] and [feature selection][fsel1] steps. I tried following options:
 - pix_per_cell: [4,8]
 - cell_per_block: [2,4]
 - orient: [7,8,9]
@@ -136,7 +136,7 @@ def process_video(frame):
     return draw_labeled_bboxes(frame, labels)
 ```
 
-I create a fixed length queue using `dqueue` and apply a threashold of 2. This makes sure that only when 2 or more consecutive frames detect a car, that window is classified as car.
+I create a fixed length queue using `dqueue` and apply a threashold. This makes sure that only when n or more consecutive frames detect a car, that window is classified as car. Using thresholds based on `decision_function` method of `LinearSVC`, I got better resutls (as in second video below and in [here][subm2])
 
 Here is the [Old video link](https://www.youtube.com/watch?v=Z32THrnDAdY)
 New Video link:
@@ -148,7 +148,7 @@ New Video link:
 
 ### Deep Learning Based Vehicle Detection
 
-While the models above performed fairly well, they needed a lot of manual finetuning and parameter adjestment to work on the video data. Increasing the number of sliding windows improved the result but significantly increasing processing time. This led me to look for deep learning based approaches. 
+While the models above performed fairly well, they needed a lot of manual finetuning and parameter adjustments to work on the video data. Increasing the number of sliding windows improved the result with significant increase in processing time. This led me to look for deep learning based approaches. 
 
 We can either use transfer learning to get the features and use sliding window technique to detect cars in the image or go for some advanced approaches. [Single Shot Multibox Detector (SSD)](https://arxiv.org/abs/1512.02325) and [You Only Look Once (YOLO): Real Time Object Detection](https://pjreddie.com/darknet/yolo/) have been very popular approaches in the literature recently and propose a significant improvement. I wanted to try their performance on the video data to see the difference. YOLO is based on __darknet__ and need some work around to get the pipeline running, whereas SSD had a port for keras and was easy to try out on the test data.
 
@@ -156,7 +156,7 @@ SSD uses a single shot feed forward convolutional neural network architecture fo
 
 ![ssd-arch](../ouput_images/ssd-arch.png)
 
-I used [ssd-keras](https://github.com/rykov8/ssd_keras) framework and SSD300 architecture for testing. Using the pretrained network weights and resizing image to 300x300, I could get upto **53fps** on test video. This was run on a Titan X GPU and i7 processor.
+I used [ssd-keras](https://github.com/rykov8/ssd_keras) framework and SSD300 architecture for testing. Using the pretrained network weights and resizing image to 300x300, I could get upto **53fps** on test video. This was run on a Titan X GPU and i7 processor. ([Submission File][ssd])
 
 SSD Based Vehicle Detection Video:
 
@@ -178,7 +178,7 @@ Whereas, using SSD network architecture, network had learn to extract better fea
 
 As alluded before, most of the images in the dataset contain the backside view of the car. We do see left and right portions of the car in our camera frames. If we can train the machine learning model with side view of the cars, I hope we can get much better results.
 
-#### Real Time Performance
+#### 3. Real Time Performance
 
 Using SVM based approaches, my result closely related with type of features I use and size of windows I search. When I increased feature size to ~1400 and I used 64, 96, 128 and 200 pixel size windows cleverly, I got farily good results. This did come at a cost of processing time. A 50 seconds video took almost 7 minutes to process. Whereas, on the SSD test case, I could get upto **53 fps** and was very fast with GPUs. This tells us that, using GPUs and parallizing searching in windows, we can make the real time detections. 
 
@@ -190,3 +190,4 @@ Using SVM based approaches, my result closely related with type of features I us
 [ppr]: ./Preproceessing.html
 [swin]: ./Sliding_Window.html
 [subm]: ./Submission_Notebook.html
+[subm2]: ./Submissoin_Notebook_ver2.html
