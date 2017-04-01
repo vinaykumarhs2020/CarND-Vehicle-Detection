@@ -154,7 +154,7 @@ We can either use transfer learning to get the features and use sliding window t
 
 SSD uses a single shot feed forward convolutional neural network architecture for detecting the objects and bounding boxes. Initial few layers are borrowed from standard classification networks like VGG-16 (fully connected layers truncated). Later layers are used for multi-scale feature map for detection and estimating the bounding boxes. The model uses weighted sum of smooth L1 localization loss and softmax confidance for loss function. Figure below shows the architecture:
 
-![ssd-arch](../ouput_images/ssd-arch.png)
+![ssd-arch](../output_images/ssd-arch.png)
 
 I used [ssd-keras](https://github.com/rykov8/ssd_keras) framework and SSD300 architecture for testing. Using the pretrained network weights and resizing image to 300x300, I could get upto **53fps** on test video. This was run on a Titan X GPU and i7 processor. ([Submission File][ssd])
 
@@ -190,4 +190,4 @@ Using SVM based approaches, my result closely related with type of features I us
 [ppr]: ./Preproceessing.html
 [swin]: ./Sliding_Window.html
 [subm]: ./Submission_Notebook.html
-[subm2]: ./Submissoin_Notebook_ver2.html
+[subm2]: ./Submission_Notebook_Ver2.html
