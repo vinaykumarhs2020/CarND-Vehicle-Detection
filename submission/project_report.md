@@ -141,30 +141,52 @@ I create a fixed length queue using `dqueue` and apply a threashold of 2. This m
 Here is the [Old video link](https://www.youtube.com/watch?v=Z32THrnDAdY)
 New Video link:
 
-[![video](http://img.youtube.com/vi/vTiS-q294PY/0.jpg)](https://www.youtube.com/watch?v=vTiS-q294PY)
+[![video](http://img.youtube.com/vi/Fo5VonIuyW0/0.jpg)](https://www.youtube.com/watch?v=Fo5VonIuyW0)
 
 
 ---
+
+### Deep Learning Based Vehicle Detection
+
+While the models above performed fairly well, they needed a lot of manual finetuning and parameter adjestment to work on the video data. Increasing the number of sliding windows improved the result but significantly increasing processing time. This led me to look for deep learning based approaches. 
+
+We can either use transfer learning to get the features and use sliding window technique to detect cars in the image or go for some advanced approaches. [Single Shot Multibox Detector (SSD)](https://arxiv.org/abs/1512.02325) and [You Only Look Once (YOLO): Real Time Object Detection](https://pjreddie.com/darknet/yolo/) have been very popular approaches in the literature recently and propose a significant improvement. I wanted to try their performance on the video data to see the difference. YOLO is based on __darknet__ and need some work around to get the pipeline running, whereas SSD had a port for keras and was easy to try out on the test data.
+
+SSD uses a single shot feed forward convolutional neural network architecture for detecting the objects and bounding boxes. Initial few layers are borrowed from standard classification networks like VGG-16 (fully connected layers truncated). Later layers are used for multi-scale feature map for detection and estimating the bounding boxes. The model uses weighted sum of smooth L1 localization loss and softmax confidance for loss function. Figure below shows the architecture:
+
+![ssd-arch](../ouput_images/ssd-arch.png)
+
+I used [ssd-keras](https://github.com/rykov8/ssd_keras) framework and SSD300 architecture for testing. Using the pretrained network weights and resizing image to 300x300, I could get upto **53fps** on test video. This was run on a Titan X GPU and i7 processor.
+
+SSD Based Vehicle Detection Video:
+
+[![video](http://img.youtube.com/vi/piUwasFJ15M/0.jpg)](https://www.youtube.com/watch?v=piUwasFJ15M)
+
+
+
 
 ### Discussion
 
 #### 1. Feature Vectors
 
-I need to spend some more time on deciding on the right feature vectors. When the size of features is more than 1000, it takes too long to train and test and hance can not be real time.
+SVM based approach relied heavily on how the feature vector was engineered. I saw a clear difference between using HOG on gray image and All channels in YUV colorspace. This asserts the fact that, it takes a lot of engineering effort to fine tune these parameters and it is hard to generalize the results.
+
+Whereas, using SSD network architecture, network had learn to extract better features from the images and performed consistently better than previous results. This was very promising.
+
 
 #### <a name="back_view"></a> 2. Back view problem
 
 As alluded before, most of the images in the dataset contain the backside view of the car. We do see left and right portions of the car in our camera frames. If we can train the machine learning model with side view of the cars, I hope we can get much better results.
 
-#### 3. CNN based features
+#### Real Time Performance
 
-Use convolution neural networks to get the features. Datasets like CIFAR-10 have car categories and can be used to get better features.
-
+Using SVM based approaches, my result closely related with type of features I use and size of windows I search. When I increased feature size to ~1400 and I used 64, 96, 128 and 200 pixel size windows cleverly, I got farily good results. This did come at a cost of processing time. A 50 seconds video took almost 7 minutes to process. Whereas, on the SSD test case, I could get upto **53 fps** and was very fast with GPUs. This tells us that, using GPUs and parallizing searching in windows, we can make the real time detections. 
 
 [//]: # (References)
 [fsel1]: ./Feature_Selection.html
 [fsel2]: ./Feature_Selection_trial2.html
 [fsel3]: ./Feature_Selection_trial3.html
+[ssd]: ./SSD_Vehicle_Detection.html
 [ppr]: ./Preproceessing.html
 [swin]: ./Sliding_Window.html
 [subm]: ./Submission_Notebook.html
