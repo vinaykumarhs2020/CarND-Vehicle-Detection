@@ -136,10 +136,11 @@ def process_video(frame):
     return draw_labeled_bboxes(frame, labels)
 ```
 
-I create a fixed length queue using `dqueue` and apply a threashold. This makes sure that only when n or more consecutive frames detect a car, that window is classified as car. Using thresholds based on `decision_function` method of `LinearSVC`, I got better resutls (as in second video below and in [here][subm2])
+I create a fixed length queue using `dqueue` and apply a threashold. This makes sure that only when n or more consecutive frames detect a car, that window is classified as car. Using thresholds based on `decision_function` method of `LinearSVC`, I got better resutls (as in video below and in [here][subm2])
 
 Here is the [Old video link](https://www.youtube.com/watch?v=Z32THrnDAdY)
-New Video link:
+
+Video link:
 
 [![video](http://img.youtube.com/vi/Fo5VonIuyW0/0.jpg)](https://www.youtube.com/watch?v=Fo5VonIuyW0)
 
